@@ -232,7 +232,7 @@ public class Arena {
     public void save() {
         Files.mkdirs(Files.file("arenas/"));
 
-        final File file = Files.create(Files.file("arenas/" + name + ".yml"));
+        final File file = Files.create(Files.file("arenas", name + ".yml"));
         final FileConfiguration config = Files.config(file);
 
         config.set("name", name());

@@ -45,9 +45,9 @@ public class Arenas {
                 final Location center = config.getLocation("center");
 
                 final Set<String> linkedPremadeKits = new HashSet<>(config.getStringList("linked_premade_kits"));
-
                 final String rawIcon = config.getString("icon", "grass block");
                 final Material icon = Materials.parse(rawIcon);
+
 
                 final boolean enabled = config.getBoolean("enabled", false);
 
