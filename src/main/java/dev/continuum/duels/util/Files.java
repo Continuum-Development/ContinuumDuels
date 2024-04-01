@@ -86,7 +86,7 @@ public class Files {
         }
     }
 
-    public void save(final @NotNull String... nodes) {
+    public static void save(final @NotNull String... nodes) {
         String joined;
 
         if (nodes.length > 1) {

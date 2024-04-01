@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -225,8 +226,10 @@ public class Arena {
         return this;
     }
 
-    public void start() {
-        // TODO
+    @NotNull
+    public File schematic() {
+        Files.mkdirs(Files.file("schematics/"));
+        return Files.file("schematics", name + ".schem");
     }
 
     public void save() {
@@ -257,5 +260,9 @@ public class Arena {
         config.set("enabled", enabled);
 
         Files.saveConfig(file, config);
+    }
+
+    public void regenerate() {
+
     }
 }

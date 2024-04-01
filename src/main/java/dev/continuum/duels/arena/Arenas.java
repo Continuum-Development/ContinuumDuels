@@ -65,7 +65,6 @@ public class Arenas {
                 arena.linkedPremadeKits().addAll(linkedPremadeKits);
 
                 arenas.add(arena);
-                arena.start();
             }
         });
     }
