@@ -2,18 +2,21 @@ package dev.continuum.duels.arena;
 
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.Materials;
+import dev.manere.utils.command.impl.suggestions.Suggestion;
+import dev.manere.utils.command.impl.suggestions.Suggestions;
+import dev.manere.utils.location.LocationUtils;
 import dev.manere.utils.scheduler.Schedulers;
+import dev.manere.utils.server.Servers;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Arenas {
     private static final Set<Arena> arenas = new HashSet<>();
@@ -67,6 +70,49 @@ public class Arenas {
                 arenas.add(arena);
             }
         });
+    }
+
+    @NotNull
+    public static Suggestions suggestions() {
+        final Suggestions suggestions = Suggestions.of();
+
+        for (final String name : names()) {
+            suggestions.add(Suggestion.text(name));
+        }
+
+        return suggestions;
+    }
+
+    @Nullable
+    public static Arena arena(final @NotNull Player player) {
+        for (final Arena arena : Arenas.all()) {
+            final Location toCheck = player.getLocation();
+
+            final Location one = arena.cornerOne();
+            final Location two = arena.cornerTwo();
+
+            if (one == null || two == null) continue;
+
+            if (LocationUtils.locIsBetween(one, two, toCheck)) return arena;
+        }
+
+        return null;
+    }
+
+    public static boolean insideAny(final @NotNull Player player) {
+        return arena(player) != null;
+    }
+
+    public static boolean inside(final @NotNull Player player, final @NotNull Arena arena) {
+        final Arena nullable = arena(player);
+        return nullable != null && nullable.name().equals(arena.name());
+    }
+
+    @NotNull
+    public static List<? extends Player> inside(final @NotNull Arena arena) {
+        final List<Player> players = new ArrayList<>();
+        for (final Player player : Servers.online()) if (inside(player, arena)) players.add(player);
+        return players;
     }
 
     public static void stop() {

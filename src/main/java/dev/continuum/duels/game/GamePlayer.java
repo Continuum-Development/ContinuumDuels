@@ -32,5 +32,10 @@ public interface GamePlayer {
     }
 
     @NotNull
+    default String name() {
+        return player().getName();
+    }
+
+    @NotNull
     GameTeam team();
 }

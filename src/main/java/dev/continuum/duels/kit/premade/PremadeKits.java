@@ -3,6 +3,8 @@ package dev.continuum.duels.kit.premade;
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.Materials;
 import dev.manere.utils.cachable.Cachable;
+import dev.manere.utils.command.impl.suggestions.Suggestion;
+import dev.manere.utils.command.impl.suggestions.Suggestions;
 import dev.manere.utils.scheduler.Schedulers;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
@@ -139,5 +141,16 @@ public class PremadeKits {
 
         kit.save();
         kits.add(kit);
+    }
+
+    @NotNull
+    public static Suggestions suggestions() {
+        final Suggestions suggestions = Suggestions.of();
+
+        for (final String name : names()) {
+            suggestions.add(Suggestion.text(name));
+        }
+
+        return suggestions;
     }
 }

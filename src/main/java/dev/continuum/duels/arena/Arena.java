@@ -2,16 +2,21 @@ package dev.continuum.duels.arena;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.continuum.duels.util.Files;
+import dev.manere.utils.location.LocationUtils;
+import dev.manere.utils.server.Servers;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Arena {

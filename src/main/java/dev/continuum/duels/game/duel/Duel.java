@@ -1,6 +1,9 @@
 package dev.continuum.duels.game.duel;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import dev.continuum.duels.arena.Arena;
+import dev.continuum.duels.arena.Arenas;
 import dev.continuum.duels.config.Messages;
 import dev.continuum.duels.game.Game;
 import dev.continuum.duels.game.GamePlayer;
@@ -8,14 +11,19 @@ import dev.continuum.duels.game.GameTeam;
 import dev.continuum.duels.game.Games;
 import dev.continuum.duels.kit.premade.PremadeKit;
 import dev.manere.utils.cachable.Cachable;
+import dev.manere.utils.elements.Elements;
 import dev.manere.utils.library.Utils;
 import dev.manere.utils.misc.ObjectUtils;
 import dev.manere.utils.model.Tuple;
+import dev.manere.utils.player.PlayerUtils;
 import dev.manere.utils.prettify.ListPrettify;
+import dev.manere.utils.scheduler.Schedulers;
 import dev.manere.utils.world.Worlds;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +33,8 @@ import java.util.*;
 public class Duel<K> implements Game<K> {
     private final Arena arena;
     private final K kit;
+    private final Player one;
+    private final Player two;
 
     private final Cachable<GameTeam, Integer> wins = Cachable.of();
     private final Cachable<GameTeam, Integer> losses = Cachable.of();
@@ -50,6 +60,9 @@ public class Duel<K> implements Game<K> {
             players.add(GamePlayer.player(two, team));
             return players;
         }));
+
+        this.one = one;
+        this.two = two;
 
         // if (kit instanceof CustomKit customKit) this.rounds = customKit.rounds();
         if (rounds != -1 && rounds != 0) this.rounds = rounds;
@@ -103,7 +116,6 @@ public class Duel<K> implements Game<K> {
 
                 cancelFight();
             } else {
-
                 for (final GamePlayer gamePlayer : players()) {
                     if (gamePlayer.uuid().equals(dead.uuid())) continue;
                     winner = gamePlayer;
@@ -157,6 +169,7 @@ public class Duel<K> implements Game<K> {
     }
 
     public void startRound() {
+        // TODO
 
     }
 
@@ -175,6 +188,19 @@ public class Duel<K> implements Game<K> {
         return spectators;
     }
 
+    @NotNull
+    private List<Player> playersAndSpectators() {
+        final List<Player> spectators = spectators();
+        final Set<? extends GamePlayer> gamePlayers = players();
+
+        final List<Player> players = new ArrayList<>();
+        for (final GamePlayer gamePlayer : gamePlayers) {
+            players.add(gamePlayer.player());
+        }
+
+        return Lists.newArrayList(Iterables.concat(players, spectators));
+    }
+
     public void cancelFight() {
         this.ended = true;
         this.wins.clear();
@@ -185,31 +211,193 @@ public class Duel<K> implements Game<K> {
 
     @Override
     public void leave(final @NotNull GamePlayer player) {
-        // TODO: implement this
+        if (spectators().contains(player.player())) {
+            stopSpectating(player.player());
+            return;
+        }
+
+        if (players().size() == 2) {
+            handleDeath(player);
+            return;
+        }
+
+        for (final GamePlayer target : players()) {
+            Messages.message("left_fight", target,
+                elements -> Elements.of(Tuple.tuple("player", player.name()))
+            );
+        }
+
+        player.player().setGameMode(GameMode.SURVIVAL);
+
+        player.player().teleport(new Location(Worlds.world("world"), 0, 64, 0));
     }
 
     @Override
     public boolean end() {
         if (task != null) task.cancel();
-        return false;
+
+        for (final Player spectator : spectators()) {
+            if (!stopSpectating(spectator)) {
+                Bukkit.getLogger().severe("Failed to stop spectating (player = " + spectator.getName() + ")");
+            }
+        }
+
+        one.teleport(new Location(Worlds.world("world"), 0, 64, 0));
+        two.teleport(new Location(Worlds.world("world"), 0, 64, 0));
+
+        arena.regenerate();
+
+        teams.clear();
+        arena.inUse(false);
+
+        cancelFight();
+        return true;
     }
 
     @Override
     public boolean start() {
         task = Bukkit.getScheduler().runTaskTimer(Utils.plugin(), () -> duration++, 0L, 1L);
-        return false;
+
+        final Location cornerOne = arena.cornerOne();
+        final Location cornerTwo = arena.cornerTwo();
+
+        if (cornerOne == null || cornerTwo == null) return false;
+
+        if (kit instanceof PremadeKit premadeKit) {
+            Messages.message("duel_started", one, (placeholders) -> {
+                placeholders.element(Tuple.tuple("red", one.getName()));
+                placeholders.element(Tuple.tuple("blue", two.getName()));
+                placeholders.element(Tuple.tuple("kit", premadeKit.displayName()));
+                placeholders.element(Tuple.tuple("arena", arena.displayName()));
+                placeholders.element(Tuple.tuple("spectators", ListPrettify.players(spectators())));
+                placeholders.element(Tuple.tuple("rounds", String.valueOf(rounds)));
+                placeholders.element(Tuple.tuple("round", String.valueOf(round)));
+
+                return placeholders;
+            });
+        }
+
+        one.teleport(cornerOne);
+        two.teleport(cornerTwo);
+
+        arena.inUse(true);
+
+        one.setWalkSpeed(0);
+        one.setJumping(false);
+        two.setWalkSpeed(0);
+        two.setJumping(false);
+
+        one.setHealth(20.0);
+        two.setHealth(20.0);
+
+        PlayerUtils.heal(one);
+        PlayerUtils.heal(two);
+
+        PlayerUtils.clearPotionEffects(one);
+        PlayerUtils.clearPotionEffects(two);
+
+        if (kit instanceof PremadeKit premadeKit) {
+            final Cachable<Integer, ItemStack> defaultLayout = ObjectUtils.defaultIfNull(
+                premadeKit.defaultLayout(), Cachable.of(Integer.class, ItemStack.class)
+            );
+
+            one.getOpenInventory().getBottomInventory().clear();
+            two.getOpenInventory().getBottomInventory().clear();
+
+            for (final Map.Entry<Integer, ItemStack> entry : defaultLayout.snapshot().asMap().entrySet()) {
+                final int index = entry.getKey();
+                final ItemStack item = entry.getValue();
+
+                one.getOpenInventory().getBottomInventory().setItem(index, item);
+                two.getOpenInventory().getBottomInventory().setItem(index, item);
+            }
+        }
+
+        // Todo: ConfigValues.duelStart()
+        Schedulers.sync().execute(() -> {
+            one.setWalkSpeed(1);
+            one.setJumping(true);
+            two.setWalkSpeed(1);
+            two.setJumping(true);
+        }, 0, 100);
+        return true;
     }
 
     @Override
     public boolean spectate(final @NotNull Player spectator, final @Nullable Player target) {
-        // TODO: implement this
-        return false;
+        Games.spectators().cache(spectator, this);
+
+        if (target != null) {
+            spectator.teleportAsync(target.getLocation().add(0, 5, 0))
+                .thenRun(() -> {
+                    for (final Player player : playersAndSpectators()) {
+                        Messages.message("started_spectating", player,
+                            replacements -> Elements.of(Tuple.tuple("spectator", spectator.getName()))
+                        );
+                    }
+
+                    spectator.setGameMode(GameMode.SPECTATOR);
+                });
+        } else {
+            final Location center = arena.center();
+            if (center == null) return false;
+
+            spectator.teleportAsync(center.add(0, 5, 0))
+                .thenRun(() -> {
+                    for (final Player player : playersAndSpectators()) {
+                        Messages.message("started_spectating", player,
+                            replacements -> Elements.of(Tuple.tuple("spectator", spectator.getName()))
+                        );
+                    }
+
+                    spectator.setGameMode(GameMode.SPECTATOR);
+                });
+        }
+
+        Schedulers.async().execute(task -> {
+            if (!spectators().contains(spectator)) {
+                task.cancel();
+                return;
+            }
+
+            if (ended()) {
+                task.cancel();
+                return;
+            }
+
+            if (!inProgress()) {
+                task.cancel();
+                return;
+            }
+
+            if (!Games.has(this)) {
+                task.cancel();
+                return;
+            }
+
+            if (!Arenas.insideAny(spectator)) {
+                final Location center = arena.center();
+                if (center == null) return;
+
+                spectator.teleportAsync(center);
+            }
+        }, 0, 20);
+        return true;
     }
 
     @Override
     public boolean stopSpectating(final @NotNull Player spectator) {
-        // TODO: implement this
-        return false;
+        Games.spectators().del(spectator, this);
+        spectator.setGameMode(GameMode.SURVIVAL);
+
+        for (final Player player : playersAndSpectators()) {
+            Messages.message("stopped_spectating", player,
+                replacements -> Elements.of(Tuple.tuple("spectator", spectator.getName()))
+            );
+        }
+
+        spectator.teleport(new Location(Worlds.world("world"), 0, 64, 0));
+        return true;
     }
 
     @Override

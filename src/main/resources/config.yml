@@ -1,0 +1,57 @@
+duel_start:
+  actions:
+    message:
+      type: message
+      settings:
+        text: "Starting in 5 seconds..."
+        type: chat
+    wait:
+      type: wait
+      settings:
+        time: 1
+        unit: second
+    message_2:
+      type: message
+      settings:
+        text: "Starting in 4 seconds..."
+        type: chat
+    wait_2:
+      type: wait
+      settings:
+        time: 1
+        unit: second
+    message_3:
+      type: message
+      settings:
+        text: "Starting in 3 seconds..."
+        type: chat
+    wait_3:
+      type: wait
+      settings:
+        time: 1
+        unit: second
+    message_4:
+      type: message
+      settings:
+        text: "Starting in 2 seconds..."
+        type: chat
+    wait_4:
+      type: wait
+      settings:
+        time: 1
+        unit: second
+    message_5:
+      type: message
+      settings:
+        text: "Starting in 1 second..."
+        type: chat
+    wait_5:
+      type: wait
+      settings:
+        time: 1
+        unit: second
+    start_message:
+      type: message
+      settings:
+        text: "Good luck!"
+        type: chat
