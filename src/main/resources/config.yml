@@ -1,56 +1,87 @@
+lobby:
+  world: "world"
+  corners:
+    one:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+    two:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+  spawn:
+    x: 0.0
+    y: 64.0
+    z: 0.0
+    yaw: 90.0
+    pitch: 90.0
+  settings:
+    teleport_on_join: false
+
 duel_start:
   actions:
     message:
+      order: 1
       type: message
       settings:
         text: "Starting in 5 seconds..."
         type: chat
     wait:
+      order: 2
       type: wait
       settings:
         time: 1
         unit: second
     message_2:
+      order: 3
       type: message
       settings:
         text: "Starting in 4 seconds..."
         type: chat
     wait_2:
+      order: 4
       type: wait
       settings:
         time: 1
         unit: second
     message_3:
+      order: 5
       type: message
       settings:
         text: "Starting in 3 seconds..."
         type: chat
     wait_3:
+      order: 6
       type: wait
       settings:
         time: 1
         unit: second
     message_4:
+      order: 7
       type: message
       settings:
         text: "Starting in 2 seconds..."
         type: chat
     wait_4:
+      order: 8
       type: wait
       settings:
         time: 1
         unit: second
     message_5:
+      order: 9
       type: message
       settings:
         text: "Starting in 1 second..."
         type: chat
     wait_5:
+      order: 10
       type: wait
       settings:
         time: 1
         unit: second
     start_message:
+      order: 11
       type: message
       settings:
         text: "Good luck!"

@@ -58,6 +58,18 @@ public class Games {
     }
 
     @NotNull
+    public static <G extends Game<?>> List<G> games(final @NotNull Class<G> gameType) {
+        final List<Game<?>> games = games();
+        final List<G> specificGames = new ArrayList<>();
+
+        for (final Game<?> game : games) if (gameType.isInstance(game)) specificGames.add(
+            gameType.cast(game)
+        );
+
+        return specificGames;
+    }
+
+    @NotNull
     public static Cachable<Player, Game<?>> spectators() {
         return spectators;
     }

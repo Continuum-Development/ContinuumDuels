@@ -1,0 +1,62 @@
+menu:
+  title: 'Duel Settings'
+  size: 54
+  placeholders:
+    not_selected: 'N/A'
+
+items:
+  arena:
+    enabled: true
+    slots: 10
+    item:
+      material: grass block
+      name: 'Select Arena'
+      amount: 1
+      lore:
+        - 'Arena: <arena>'
+      flags:
+        - '*'
+  kit:
+    enabled: true
+    slots: 11
+    item:
+      material: diamond sword
+      name: 'Select Kit'
+      amount: 1
+      lore:
+        - 'Kit: <kit>'
+      flags:
+        - '*'
+  rounds:
+    enabled: true
+    slots: 12
+    item:
+      material: paper
+      name: 'Select Rounds'
+      amount: 1
+      lore:
+        - 'Rounds: <rounds>'
+      flags:
+        - '*'
+  confirm:
+    enabled: true
+    slots: 15
+    item:
+      material: lime dye
+      name: 'Confirm'
+      amount: 1
+      lore:
+        - 'Arena: <arena>'
+        - 'Kit: <kit>'
+        - 'Rounds: <rounds>'
+      flags:
+        - '*'
+  cancel:
+    enabled: true
+    slots: 16
+    item:
+      material: barrier
+      name: 'Cancel'
+      amount: 1
+      flags:
+        - '*'

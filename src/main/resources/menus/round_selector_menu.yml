@@ -1,0 +1,18 @@
+menu:
+  title: 'Duel Settings'
+  size: 54
+
+round_item:
+  round_to_slot_mapper:
+    one: 10
+    two: 12
+    three: 14
+    four: 16
+    five: 19
+    ten: 21
+    twenty: 23
+    twenty_five: 25
+    fifty: 30
+    one_hundred: 32
+  item:
+    # TODO

@@ -10,6 +10,7 @@ import dev.continuum.duels.game.GamePlayer;
 import dev.continuum.duels.game.GameTeam;
 import dev.continuum.duels.game.Games;
 import dev.continuum.duels.kit.premade.PremadeKit;
+import dev.continuum.duels.lobby.Lobby;
 import dev.manere.utils.cachable.Cachable;
 import dev.manere.utils.elements.Elements;
 import dev.manere.utils.library.Utils;
@@ -100,7 +101,7 @@ public class Duel<K> implements Game<K> {
                         });
                     }
 
-                    player.player().teleport(new Location(Worlds.world("world"), 0, 64, 0));
+                    Lobby.teleport(player.player());
                 }
 
                 for (final Player spectator : spectators()) {
@@ -143,7 +144,7 @@ public class Duel<K> implements Game<K> {
                         });
                     }
 
-                    player.player().teleport(new Location(Worlds.world("world"), 0, 64, 0));
+                    Lobby.teleport(player.player());
                 }
 
                 round++;
@@ -161,9 +162,7 @@ public class Duel<K> implements Game<K> {
 
     @NotNull
     public GameTeam opponentTeam(final @NotNull GameTeam team) {
-        for (final GameTeam gameTeam : teams) {
-            if (!gameTeam.equals(team)) return gameTeam;
-        }
+        for (final GameTeam gameTeam : teams) if (!gameTeam.equals(team)) return gameTeam;
 
         return new ArrayList<>(teams()).get(0);
     }
@@ -194,9 +193,7 @@ public class Duel<K> implements Game<K> {
         final Set<? extends GamePlayer> gamePlayers = players();
 
         final List<Player> players = new ArrayList<>();
-        for (final GamePlayer gamePlayer : gamePlayers) {
-            players.add(gamePlayer.player());
-        }
+        for (final GamePlayer gamePlayer : gamePlayers) players.add(gamePlayer.player());
 
         return Lists.newArrayList(Iterables.concat(players, spectators));
     }
@@ -221,15 +218,12 @@ public class Duel<K> implements Game<K> {
             return;
         }
 
-        for (final GamePlayer target : players()) {
-            Messages.message("left_fight", target,
-                elements -> Elements.of(Tuple.tuple("player", player.name()))
-            );
-        }
+        for (final GamePlayer target : players()) Messages.message("left_fight", target,
+            elements -> Elements.of(Tuple.tuple("player", player.name()))
+        );
 
         player.player().setGameMode(GameMode.SURVIVAL);
-
-        player.player().teleport(new Location(Worlds.world("world"), 0, 64, 0));
+        Lobby.teleport(player.player());
     }
 
     @Override
@@ -242,8 +236,8 @@ public class Duel<K> implements Game<K> {
             }
         }
 
-        one.teleport(new Location(Worlds.world("world"), 0, 64, 0));
-        two.teleport(new Location(Worlds.world("world"), 0, 64, 0));
+        Lobby.teleport(one);
+        Lobby.teleport(two);
 
         arena.regenerate();
 
@@ -258,10 +252,10 @@ public class Duel<K> implements Game<K> {
     public boolean start() {
         task = Bukkit.getScheduler().runTaskTimer(Utils.plugin(), () -> duration++, 0L, 1L);
 
-        final Location cornerOne = arena.cornerOne();
-        final Location cornerTwo = arena.cornerTwo();
+        final Location spawnOne = arena.spawnOne();
+        final Location spawnTwo = arena.spawnTwo();
 
-        if (cornerOne == null || cornerTwo == null) return false;
+        if (spawnOne == null || spawnTwo == null) return false;
 
         if (kit instanceof PremadeKit premadeKit) {
             Messages.message("duel_started", one, (placeholders) -> {
@@ -277,8 +271,8 @@ public class Duel<K> implements Game<K> {
             });
         }
 
-        one.teleport(cornerOne);
-        two.teleport(cornerTwo);
+        one.teleport(spawnOne);
+        two.teleport(spawnTwo);
 
         arena.inUse(true);
 
@@ -396,7 +390,7 @@ public class Duel<K> implements Game<K> {
             );
         }
 
-        spectator.teleport(new Location(Worlds.world("world"), 0, 64, 0));
+        Lobby.teleport(spectator);
         return true;
     }
 
@@ -468,9 +462,7 @@ public class Duel<K> implements Game<K> {
     public Cachable<GameTeam, Tuple<Integer, Integer>> winsAndLosses() {
         final Cachable<GameTeam, Tuple<Integer, Integer>> winsAndLosses = Cachable.of();
 
-        for (final GameTeam team : teams()) {
-            winsAndLosses.cache(team, winsAndLosses(team));
-        }
+        for (final GameTeam team : teams()) winsAndLosses.cache(team, winsAndLosses(team));
 
         return winsAndLosses;
     }
