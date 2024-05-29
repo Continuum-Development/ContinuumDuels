@@ -2,6 +2,7 @@ package dev.continuum.duels.config;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.manere.utils.library.Utils;
+import dev.manere.utils.scheduler.Schedulers;
 import dev.manere.utils.text.color.TextStyle;
 import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,10 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +24,10 @@ public class ConfigHandler {
                 -> object instanceof Integer integer ? integer : Integer.valueOf(Integer.parseInt(object.toString())));
         typeConverters.put(Integer.class, object
                 -> object instanceof Integer integer ? integer : Integer.valueOf(Integer.parseInt(object.toString())));
+        typeConverters.put(double.class, object
+            -> object instanceof Double doubleValue ? doubleValue : Double.valueOf(Double.parseDouble(object.toString())));
+        typeConverters.put(Double.class, object
+            -> object instanceof Double doubleValue ? doubleValue : Double.valueOf(Double.parseDouble(object.toString())));
         typeConverters.put(Component.class, object
                 -> object instanceof Component component ? component : TextStyle.style((String) object));
         typeConverters.put(String.class, object
@@ -61,8 +63,19 @@ public class ConfigHandler {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <V> void edit(final @NotNull String path, final @NotNull ValueEditor<V> editor) {
+        config().set(path, editor.edit((V) config().get(path)));
+        save();
+    }
+
+    public static <V> void edit(final @NotNull String path, final @NotNull Class<V> type, final @NotNull ValueEditor<V> editor) {
+        config().set(path, editor.edit(type.cast(config().get(path))));
+        save();
+    }
+
     @NotNull
-    public static <T> T as(final @Nullable Class<T> type, final @NotNull String path) {
+    public static <T> T value(final @Nullable Class<T> type, final @NotNull String path) {
         final Object value = ConfigHandler.config().get(path);
 
         if (type == null) {
@@ -91,8 +104,33 @@ public class ConfigHandler {
     }
 
     @NotNull
-    public static List<String> asList(final @NotNull String path) {
+    public static List<String> list(final @NotNull String path) {
         final FileConfiguration configuration = config();
         return configuration.getStringList(path);
+    }
+
+    @NotNull
+    public static List<Map<?, ?>> mapList(final @NotNull String path) {
+        return config().getMapList(path);
+    }
+
+    public static void comment(final @NotNull String path, final @NotNull String @NotNull ... comments) {
+        comment(path, new ArrayList<>(Arrays.asList(comments)));
+    }
+
+    public static void comment(final @NotNull String path, final @NotNull List<String> comments) {
+        config().setComments(path, comments);
+    }
+
+    public static void inlineComment(final @NotNull String path, final @NotNull String @NotNull ... comments) {
+        inlineComment(path, new ArrayList<>(Arrays.asList(comments)));
+    }
+
+    public static void inlineComment(final @NotNull String path, final @NotNull List<String> comments) {
+        config().setInlineComments(path, comments);
+    }
+
+    public static void save() {
+        Schedulers.async().execute(() -> Utils.plugin().saveConfig());
     }
 }

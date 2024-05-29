@@ -2,6 +2,7 @@ package dev.continuum.duels.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.continuum.duels.ContinuumDuels;
+import dev.manere.utils.scheduler.Schedulers;
 import dev.manere.utils.server.Servers;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,9 +29,15 @@ public class Files {
     @CanIgnoreReturnValue
     public static boolean saveConfig(final @NotNull File file, final @NotNull FileConfiguration config) {
         try {
-            config.save(file);
-            return true;
-        } catch (IOException e) {
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    config.save(file);
+                    return true;
+                } catch (final IOException ignored) {
+                    return false;
+                }
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
             return false;
         }
     }

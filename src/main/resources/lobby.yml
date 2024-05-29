@@ -1,0 +1,19 @@
+lobby:
+  world: "world"
+  corners:
+    one:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+    two:
+      x: 0.0
+      y: 64.0
+      z: 0.0
+  spawn:
+    x: 0.0
+    y: 64.0
+    z: 0.0
+    yaw: 90.0
+    pitch: 90.0
+  settings:
+    teleport_on_join: false

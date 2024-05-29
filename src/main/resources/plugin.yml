@@ -1,5 +1,5 @@
 name: ContinuumDuels
 version: '${version}'
 main: dev.continuum.duels.ContinuumDuels
-api-version: '1.20'
+api-version: '1.19'
 authors: [Continuum (Justus, Manere_)]

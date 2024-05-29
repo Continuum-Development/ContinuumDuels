@@ -1,6 +1,17 @@
 menu:
-  title: 'Duel Settings'
+  title: 'Duel Settings > Rounds'
   size: 54
+
+items:
+  back_button:
+    enabled: true
+    slots: [ 53 ]
+    item:
+      material: barrier
+      amount: 1
+      name: '<aqua>Back'
+      flags:
+        - '*'
 
 round_item:
   round_to_slot_mapper:

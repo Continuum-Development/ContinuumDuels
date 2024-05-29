@@ -2,16 +2,21 @@ package dev.continuum.duels.command;
 
 import dev.manere.utils.command.AbstractCommand;
 import dev.manere.utils.elements.Elements;
-import dev.manere.utils.elements.impl.ElementsImpl;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandRegistry {
-    private static final Elements<Class<? extends AbstractCommand>> commands = new ElementsImpl<>() {{ elements(
-        DuelCommand.class
-    ); }};
+    private final Elements<@NotNull Class<? extends @NotNull AbstractCommand>> commands = Elements.of();
 
-    public static void register() {
-        for (final Class<? extends AbstractCommand> command : commands) {
-            AbstractCommand.register(command);
-        }
+    public void register(final @NotNull Class<? extends AbstractCommand> command) {
+        AbstractCommand.register(command);
+    }
+
+    public void register() {
+        for (final @NotNull Class<? extends AbstractCommand> command : commands) register(command);
+    }
+
+    @NotNull
+    public Elements<@NotNull Class<? extends @NotNull AbstractCommand>> commands() {
+        return commands;
     }
 }

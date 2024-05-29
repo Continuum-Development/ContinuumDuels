@@ -11,6 +11,7 @@ import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,12 @@ public class TextMessage {
     private Sound sound = null;
     private double pitch = -1;
     private double volume = -1;
+
+    private String title;
+    private String subtitle;
+    private Duration fadeIn;
+    private Duration stay;
+    private Duration fadeOut;
 
     public TextMessage(final @NotNull TextMessageType type, final @NotNull String raw, final @NotNull Elements<Tuple<String, String>> replacements) {
         this.type = type;
@@ -54,6 +61,26 @@ public class TextMessage {
         });
 
         return miniMessage.deserialize(replacedRaw(), smallCapsTag);
+    }
+
+    @NotNull
+    public String replaced(@NotNull String text) {
+        for (final Tuple<String, String> tuple : replacements) {
+            final String rawTupleKey = tuple.key();
+            if (rawTupleKey == null) continue;
+
+            final String tupleKey = rawTupleKey
+                .replaceAll("<", "")
+                .replaceAll(">", "");
+
+            final String key = "<" + tupleKey + ">";
+            final String val = tuple.val();
+            if (val == null) continue;
+
+            text = text.replaceAll(key, val);
+        }
+
+        return text;
     }
 
     @NotNull
@@ -99,5 +126,55 @@ public class TextMessage {
 
     public TextMessageType type() {
         return type;
+    }
+
+    public void title(
+        final @NotNull String title, final @NotNull String subtitle,
+        final @NotNull Duration fadeIn,
+        final @NotNull Duration stay,
+        final @NotNull Duration fadeOut
+    ) {
+        this.title = title;
+        this.subtitle = subtitle;
+        this.fadeIn = fadeIn;
+        this.stay = stay;
+        this.fadeOut = fadeOut;
+    }
+
+    @Nullable
+    public Component title() {
+        final TagResolver smallCapsTag = TagResolver.resolver("small_caps", (queue, ctx) -> {
+            final String text = queue.popOr("Invalid syntax found. Should be <small_caps:'text to convert'>").value();
+            return Tag.selfClosingInserting(Component.text(SmallFont.convert(text)));
+        });
+
+        if (title == null || title.isEmpty() || title.isBlank()) return null;
+        return miniMessage.deserialize(replaced(title), smallCapsTag);
+    }
+
+    @Nullable
+    public Component subtitle() {
+        final TagResolver smallCapsTag = TagResolver.resolver("small_caps", (queue, ctx) -> {
+            final String text = queue.popOr("Invalid syntax found. Should be <small_caps:'text to convert'>").value();
+            return Tag.selfClosingInserting(Component.text(SmallFont.convert(text)));
+        });
+
+        if (subtitle == null || subtitle.isEmpty() || subtitle.isBlank()) return null;
+        return miniMessage.deserialize(replaced(subtitle), smallCapsTag);
+    }
+
+    @Nullable
+    public Duration fadeIn() {
+        return fadeIn;
+    }
+
+    @Nullable
+    public Duration stay() {
+        return stay;
+    }
+
+    @Nullable
+    public Duration fadeOut() {
+        return fadeOut;
     }
 }

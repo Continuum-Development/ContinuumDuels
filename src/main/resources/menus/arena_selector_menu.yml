@@ -1,0 +1,41 @@
+menu:
+  title: 'Duel Settings > Arenas'
+  size: 54
+
+items:
+  back_button:
+    enabled: true
+    slots: [53]
+    item:
+      material: barrier
+      amount: 1
+      name: '<aqua>Back'
+      flags:
+        - '*'
+  previous_page_button:
+    enabled: true
+    slots: [45]
+    item:
+      material: spectral arrow
+      amount: 1
+      name: '<aqua>Previous Page'
+      flags:
+        - '*'
+  next_page_button:
+    enabled: true
+    slots: [47]
+    item:
+      material: spectral arrow
+      amount: 1
+      name: '<aqua>Next Page'
+      flags:
+        - '*'
+  current_page_button:
+    enabled: true
+    slots: [46]
+    item:
+      material: paper
+      amount: 1
+      name: '<aqua>Current Page: <white><page>'
+      flags:
+        - '*'
