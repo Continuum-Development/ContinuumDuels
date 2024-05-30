@@ -1,5 +1,7 @@
 package dev.continuum.duels.fight;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.AsyncCallable;
 import dev.continuum.duels.arena.ArenaCorner;
 import dev.continuum.duels.arena.ArenaSpawn;
 import dev.continuum.duels.arena.TemporaryArena;
@@ -12,11 +14,14 @@ import dev.manere.utils.model.Tuple;
 import dev.manere.utils.player.PlayerUtils;
 import dev.manere.utils.prettify.ListPrettify;
 import dev.manere.utils.scheduler.Schedulers;
+import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,17 +76,31 @@ public class DuelFight implements Fight<DuelTeam> {
 
     @Override
     public boolean end(final @NotNull Player winner) {
-        Messages.message("duel_ended", player, (placeholders) -> {
-            placeholders.element(Tuple.tuple("winner", winner.getName()));
-            placeholders.element(Tuple.tuple("loser", opponent(teams.val(winner.getUniqueId())).getName()));
-            placeholders.element(Tuple.tuple("kit", kit.displayName()));
-            placeholders.element(Tuple.tuple("arena", arena.info().displayName()));
-            placeholders.element(Tuple.tuple("spectators", ListPrettify.players(new ArrayList<>(spectators()))));
-            placeholders.element(Tuple.tuple("rounds", String.valueOf(rounds)));
-            placeholders.element(Tuple.tuple("round", String.valueOf(round())));
+        for (final Player player : playersAndSpectators()) {
+            FrozenPlayers.unfreeze(player);
 
-            return placeholders;
-        });
+            Messages.message("duel_ended", player, (placeholders) -> {
+                placeholders.element(Tuple.tuple("winner", winner.getName()));
+                placeholders.element(Tuple.tuple("loser", opponent(winner).getName()));
+                placeholders.element(Tuple.tuple("kit", kit.displayName()));
+                placeholders.element(Tuple.tuple("arena", arena.info().displayName()));
+                placeholders.element(Tuple.tuple("spectators", ListPrettify.players(new ArrayList<>(spectators()))));
+                placeholders.element(Tuple.tuple("rounds", String.valueOf(rounds)));
+                placeholders.element(Tuple.tuple("round", String.valueOf(round())));
+
+                return placeholders;
+            });
+
+            player.setWorldBorder(null);
+        }
+
+        for (final Player player : players()) {
+            player.setGameMode(GameMode.SURVIVAL);
+        }
+
+        for (final Player player : spectators) {
+            player.setGameMode(GameMode.SPECTATOR);
+        }
 
         ended = true;
 
@@ -98,6 +117,8 @@ public class DuelFight implements Fight<DuelTeam> {
         if (spawnOne == null || spawnTwo == null) return false;
 
         for (final Player player : playersAndSpectators()) {
+            player.setWorldBorder(worldBorder());
+
             Messages.message("round_start_message", player, (placeholders) -> {
                 placeholders.element(Tuple.tuple("red", one.getName()));
                 placeholders.element(Tuple.tuple("blue", two.getName()));
@@ -177,6 +198,8 @@ public class DuelFight implements Fight<DuelTeam> {
         if (spawnOne == null || spawnTwo == null) return false;
 
         for (final Player player : playersAndSpectators()) {
+            player.setWorldBorder(worldBorder());
+
             Messages.message("round_start_message", player, (placeholders) -> {
                 placeholders.element(Tuple.tuple("red", one.getName()));
                 placeholders.element(Tuple.tuple("blue", two.getName()));
@@ -188,6 +211,13 @@ public class DuelFight implements Fight<DuelTeam> {
 
                 return placeholders;
             });
+        }
+
+        for (final Player spectator : spectators()) {
+            final Location center = arena.center();
+            if (center == null) return false;
+
+            spectator.teleportAsync(center);
         }
 
         one.teleport(spawnOne);

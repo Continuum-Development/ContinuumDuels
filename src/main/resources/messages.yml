@@ -2,4 +2,12 @@ starting_in_seconds:
   type: title
   title: 'calc'
   subtitle: 'calc is short for calculator'
-
+  fade_in:
+    time: 0
+    unit: seconds
+  stay:
+    time: 0
+    unit: seconds
+  fade_out:
+    time: 0
+    unit: seconds
