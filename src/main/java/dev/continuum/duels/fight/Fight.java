@@ -13,7 +13,9 @@ public interface Fight<T> {
 
     void leave(final @NotNull Player player);
 
-    boolean end(final @NotNull Player winner);
+    boolean endRound(final @NotNull Player winner);
+
+    boolean endFight();
 
     boolean startRound();
 

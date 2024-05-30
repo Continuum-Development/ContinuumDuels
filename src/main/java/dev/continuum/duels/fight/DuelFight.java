@@ -7,6 +7,7 @@ import dev.continuum.duels.arena.ArenaSpawn;
 import dev.continuum.duels.arena.TemporaryArena;
 import dev.continuum.duels.config.Messages;
 import dev.continuum.duels.kit.Kit;
+import dev.continuum.duels.lobby.Lobby;
 import dev.manere.utils.cachable.Cachable;
 import dev.manere.utils.elements.Elements;
 import dev.manere.utils.misc.ObjectUtils;
@@ -15,6 +16,7 @@ import dev.manere.utils.player.PlayerUtils;
 import dev.manere.utils.prettify.ListPrettify;
 import dev.manere.utils.scheduler.Schedulers;
 import io.papermc.paper.entity.TeleportFlag;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -61,6 +63,8 @@ public class DuelFight implements Fight<DuelTeam> {
 
     @Override
     public void handleDeath(final @NotNull Player dead) {
+        final Player winner = opponent(dead);
+
 
     }
 
@@ -75,36 +79,76 @@ public class DuelFight implements Fight<DuelTeam> {
     }
 
     @Override
-    public boolean end(final @NotNull Player winner) {
+    public boolean endFight() {
+        final Location spawnOne = arena.spawn(ArenaSpawn.ONE);
+        final Location spawnTwo = arena.spawn(ArenaSpawn.TWO);
+        final Location center = arena.center();
+
+        if (spawnOne == null || spawnTwo == null || center == null) return false;
+
+        final int redWins = wins(DuelTeam.RED);
+        final int blueWins = wins(DuelTeam.BLUE);
+
+        if (redWins == blueWins) {
+            // tie
+            return true;
+        }
+
+        this.ended = true;
+        return true;
+    }
+
+    @Override
+    public boolean endRound(final @NotNull Player winner) {
+        final Location spawnOne = arena.spawn(ArenaSpawn.ONE);
+        final Location spawnTwo = arena.spawn(ArenaSpawn.TWO);
+        final Location center = arena.center();
+
+        if (spawnOne == null || spawnTwo == null || center == null) return false;
+
+        final Player loser = opponent(winner);
+
         for (final Player player : playersAndSpectators()) {
             FrozenPlayers.unfreeze(player);
 
-            Messages.message("duel_ended", player, (placeholders) -> {
+            Messages.message("round_ended", player, (placeholders) -> {
                 placeholders.element(Tuple.tuple("winner", winner.getName()));
-                placeholders.element(Tuple.tuple("loser", opponent(winner).getName()));
+                placeholders.element(Tuple.tuple("loser", loser.getName()));
                 placeholders.element(Tuple.tuple("kit", kit.displayName()));
                 placeholders.element(Tuple.tuple("arena", arena.info().displayName()));
                 placeholders.element(Tuple.tuple("spectators", ListPrettify.players(new ArrayList<>(spectators()))));
                 placeholders.element(Tuple.tuple("rounds", String.valueOf(rounds)));
                 placeholders.element(Tuple.tuple("round", String.valueOf(round())));
+                placeholders.element(Tuple.tuple("duration", DurationFormatUtils.formatDuration(duration(), "HH'h' mm'm' ss's'", false)));
 
                 return placeholders;
             });
-
-            player.setWorldBorder(null);
         }
 
-        for (final Player player : players()) {
-            player.setGameMode(GameMode.SURVIVAL);
+        for (final Player player : spectators()) {
+            player.teleportAsync(center).whenComplete(
+                ($, $$) -> player.setGameMode(GameMode.SPECTATOR)
+            );
         }
 
-        for (final Player player : spectators) {
-            player.setGameMode(GameMode.SPECTATOR);
-        }
+        one.setInvulnerable(true);
 
-        ended = true;
+        final var ref = new Object() {
+            boolean result = true;
+        };
 
-        return true;
+        Schedulers.sync().execute(() -> {
+            one.setInvulnerable(false);
+
+            if (!startRound()) {
+                ref.result = false;
+                return;
+            }
+
+            ref.result = true;
+        }, 60);
+
+        return ref.result;
     }
 
     @Override
@@ -132,23 +176,25 @@ public class DuelFight implements Fight<DuelTeam> {
             });
         }
 
-        one.teleport(spawnOne);
-        two.teleport(spawnTwo);
+        one.teleportAsync(spawnOne).whenComplete(($, $$) -> {
+            one.setHealth(20.0);
+            one.setWorldBorder(worldBorder());
+            one.setGameMode(GameMode.SURVIVAL);
+            PlayerUtils.heal(one);
+            PlayerUtils.clearPotionEffects(one);
+            kit.contents().give(one);
+            FrozenPlayers.freeze(one);
+        });
 
-        one.setHealth(20.0);
-        two.setHealth(20.0);
-
-        PlayerUtils.heal(one);
-        PlayerUtils.heal(two);
-
-        PlayerUtils.clearPotionEffects(one);
-        PlayerUtils.clearPotionEffects(two);
-
-        kit.contents().give(one);
-        kit.contents().give(two);
-
-        FrozenPlayers.freeze(one);
-        FrozenPlayers.freeze(two);
+        two.teleportAsync(spawnTwo).whenComplete(($, $$) -> {
+            two.setHealth(20.0);
+            two.setWorldBorder(worldBorder());
+            two.setGameMode(GameMode.SURVIVAL);
+            PlayerUtils.heal(two);
+            PlayerUtils.clearPotionEffects(two);
+            kit.contents().give(two);
+            FrozenPlayers.freeze(two);
+        });
 
         var ref = new Object() {
             int secondsLeft = 5;
