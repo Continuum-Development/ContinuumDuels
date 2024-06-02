@@ -4,12 +4,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.continuum.duels.config.ConfigHandler;
 import dev.continuum.duels.config.ValueEditor;
 import dev.continuum.duels.kit.Kit;
-import dev.continuum.duels.kit.PremadeKit;
 import dev.continuum.duels.kit.PremadeKits;
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.PlayerSpecific;
 import dev.continuum.duels.util.Savable;
-import dev.continuum.duels.util.SavableCache;
 import dev.manere.utils.cachable.Cachable;
 import dev.manere.utils.misc.ObjectUtils;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.UUID;
 
 public class PlayerRating implements PlayerSpecific, Savable {
@@ -66,7 +63,6 @@ public class PlayerRating implements PlayerSpecific, Savable {
     public String ratingPretty(final @NotNull Kit kit) {
         return new DecimalFormat("#.#").format(rating(kit));
     }
-
 
     @Override
     public boolean save() {

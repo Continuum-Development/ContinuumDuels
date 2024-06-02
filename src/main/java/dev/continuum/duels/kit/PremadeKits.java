@@ -1,16 +1,24 @@
 package dev.continuum.duels.kit;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.continuum.duels.arena.Arena;
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.SavableCache;
 import dev.manere.utils.elements.Elements;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 public class PremadeKits implements SavableCache<PremadeKit> {
     private static final Elements<PremadeKit> cached = Elements.of();
+
+    @Nullable
+    public static PremadeKit kit(final @NotNull String name) {
+        for (final PremadeKit kit : cached) if (kit.name().equals(name)) return kit;
+        return null;
+    }
 
     @NotNull
     @Override

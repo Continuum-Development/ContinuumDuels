@@ -11,17 +11,17 @@ import java.io.File;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Arenas implements SavableCache<PremadeArena> {
+public class PremadeArenas implements SavableCache<PremadeArena> {
     private static final Elements<PremadeArena> cached = Elements.of();
 
     @Nullable
-    public static Arena arena(final @NotNull String name) {
-        for (final Arena arena : cached) if (arena.name().equals(name)) return arena;
+    public static PremadeArena arena(final @NotNull String name) {
+        for (final PremadeArena arena : cached) if (arena.name().equals(name)) return arena;
         return null;
     }
 
     @Nullable
-    public static Arena any() {
+    public static PremadeArena any() {
         if (cached.size() == 0) return null;
 
         final int index = ThreadLocalRandom.current().nextInt(0, cached.size() + 1);

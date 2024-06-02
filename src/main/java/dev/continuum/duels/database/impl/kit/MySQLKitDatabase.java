@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import dev.continuum.duels.ContinuumDuels;
 import dev.continuum.duels.arena.Arena;
-import dev.continuum.duels.arena.Arenas;
+import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.database.Database;
 import dev.continuum.duels.kit.CustomKit;
 import dev.continuum.duels.kit.KitContents;
@@ -16,7 +16,6 @@ import dev.manere.utils.model.Tuple;
 import dev.manere.utils.serializers.Serializers;
 import dev.manere.utils.sql.query.SQLTableBuilder;
 import org.bukkit.Bukkit;
-import org.checkerframework.checker.units.qual.C;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -24,7 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean> {
     private static final HikariConfig config = new HikariConfig();
@@ -229,7 +227,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
 
                     final String arenaName = resultSet.getString("arena");
                     final Elements<Arena> arenas = Elements.of();
-                    arenas.element(Arenas.arena(arenaName));
+                    arenas.element(PremadeArenas.arena(arenaName));
                     value.arenas(arenas);
                     return true;
                 } else {

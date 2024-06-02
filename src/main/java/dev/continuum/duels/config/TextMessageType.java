@@ -33,5 +33,5 @@ public enum TextMessageType {
      *
      * @see Audience#sendTitlePart(TitlePart, Object)
      */
-    TITLE
+    TITLE,
 }

@@ -1,7 +1,7 @@
 package dev.continuum.duels.kit;
 
 import dev.continuum.duels.arena.Arena;
-import dev.continuum.duels.arena.Arenas;
+import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.database.provider.DatabaseProviders;
 import dev.continuum.duels.util.PlayerSpecific;
 import dev.manere.utils.elements.Elements;
@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 public class CustomKit implements Kit, PlayerSpecific {
     private KitContents contents = KitContents.empty();
-    private Arena arena = Arenas.any();
+    private Arena arena = PremadeArenas.any();
 
     private final String name;
     private final UUID owner;

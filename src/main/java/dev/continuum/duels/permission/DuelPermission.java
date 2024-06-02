@@ -3,7 +3,9 @@ package dev.continuum.duels.permission;
 import org.jetbrains.annotations.NotNull;
 
 public enum DuelPermission {
-    ARENA_COMMAND("continuum.duels.commands.arena");
+    ARENA_COMMAND("continuum.duels.commands.arena"),
+    PRESET_KIT_COMMAND("continuum.duels.commands.presetkits"),
+    DUEL_COMMAND("continuum.duels.commands.duel");
 
     private final String key;
 

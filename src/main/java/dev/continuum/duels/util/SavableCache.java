@@ -1,6 +1,7 @@
 package dev.continuum.duels.util;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.continuum.duels.kit.PremadeKits;
 import dev.manere.utils.elements.Elements;
 import dev.manere.utils.library.Utils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -17,7 +18,7 @@ import java.util.logging.Level;
 public interface SavableCache<S extends Savable> {
     @NotNull
     @CanIgnoreReturnValue
-    static <S extends Savable, C extends SavableCache<S>> SavableCache<S> cache(final @NotNull CacheAction action, final @NotNull Class<C> type, final @NotNull String name) {
+    static <S extends Savable, C extends SavableCache<S>> C cache(final @NotNull CacheAction action, final @NotNull Class<C> type, final @NotNull String name) {
         try {
             final C cache = type.getDeclaredConstructor().newInstance();
 
@@ -65,6 +66,12 @@ public interface SavableCache<S extends Savable> {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @NotNull
+    @CanIgnoreReturnValue
+    static <S extends Savable, C extends SavableCache<S>> C cache(final @NotNull Class<C> type) {
+        return cache(CacheAction.NONE, type, "");
     }
 
     @NotNull

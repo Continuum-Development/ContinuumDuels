@@ -1,7 +1,7 @@
 package dev.continuum.duels.kit;
 
 import dev.continuum.duels.arena.Arena;
-import dev.continuum.duels.arena.Arenas;
+import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.MaterialUtils;
 import dev.manere.utils.cachable.Cachable;
@@ -171,7 +171,7 @@ public class PremadeKit implements Kit {
         final Elements<Arena> arenas = Elements.of();
 
         for (final String rawArena : rawArenas) {
-            arenas.element(Arenas.arena(rawArena));
+            arenas.element(PremadeArenas.arena(rawArena));
         }
 
         this.arenas = arenas;

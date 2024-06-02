@@ -2,6 +2,7 @@ package dev.continuum.duels.fight;
 
 import dev.continuum.duels.arena.TemporaryArena;
 import dev.continuum.duels.kit.Kit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,9 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public interface Fight<T> {
-    void handleDeath(final @NotNull Player dead);
+    void handleDeath(final @NotNull Player dead, final @NotNull Location deathLocation);
 
     void leave(final @NotNull Player player);
+
+    long totalDuration();
 
     boolean endRound(final @NotNull Player winner);
 

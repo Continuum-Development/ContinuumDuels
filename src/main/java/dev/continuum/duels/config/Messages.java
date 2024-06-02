@@ -55,51 +55,6 @@ public class Messages {
 
     @NotNull
     public static TextMessage of(final @NotNull String name, final @NotNull Elements<Tuple<String, String>> replacements) {
-        /*final String textKey = name + ".text";
-        final String typeKey = name + ".type";
-        final String soundsKey = name + ".sounds";
-        final String soundKey = soundsKey + ".sound";
-        final String pitchKey = soundsKey + ".pitch";
-        final String volumeKey = soundsKey + ".volume";
-
-        final FileConfiguration config = config();
-
-        Object raw = config.get(textKey);
-        String type = config.getString(typeKey);
-
-        if (raw == null) raw = name;
-        if (type == null) type = "chat";
-
-        final TextMessageType textMessageType = type(type);
-
-        if (raw instanceof List<?> list) {
-            final String soundRaw = config.getString(soundKey);
-            final double pitch = config.getDouble(pitchKey);
-            final double volume = config.getDouble(volumeKey);
-
-            final TextMessage message = new TextMessage(textMessageType, (List<String>) list, replacements);
-
-            if (soundRaw != null && pitch != -1 && volume != -1) {
-                message.sound(soundRaw, pitch, volume);
-            }
-
-            return message;
-        } else if (raw instanceof String string) {
-            final String soundRaw = config.getString(soundKey);
-            final double pitch = config.getDouble(pitchKey);
-            final double volume = config.getDouble(volumeKey);
-
-            final TextMessage message = new TextMessage(textMessageType, string, replacements);
-
-            if (soundRaw != null && pitch != -1 && volume != -1) {
-                message.sound(soundRaw, pitch, volume);
-            }
-
-            return message;
-        }
-
-        return new TextMessage(textMessageType, raw.toString());*/
-
         final FileConfiguration config = config();
 
         final String soundsKey = name + ".sounds";
@@ -111,6 +66,8 @@ public class Messages {
         final String rawType = config.getString(name + ".type", "chat");
         final TextMessageType type = type(rawType);
 
+        if (!((boolean) config.get(name + ".enabled", true))) return new TextMessage(type, "ZGlzYWJsZWQ=");
+
         if (rawText == null && type != TextMessageType.TITLE) return new TextMessage(type, "", replacements);
 
         if (type == TextMessageType.TITLE) {
@@ -118,7 +75,6 @@ public class Messages {
             final double pitch = config.getDouble(pitchKey);
             final double volume = config.getDouble(volumeKey);
 
-            // todo
             final TextMessage message = new TextMessage(type, "", replacements);
 
             if (soundRaw != null && pitch != -1 && volume != -1) {
@@ -166,42 +122,7 @@ public class Messages {
     }
 
     public static void findAndSend(final @NotNull String name, final @NotNull Audience audience) {
-        final TextMessage message = of(name);
-        if (message.replacedRaw().isEmpty()) return;
-
-        if (message.type() == TextMessageType.CHAT) {
-            audience.sendMessage(message.text());
-        } else if (message.type() == TextMessageType.ACTION_BAR) {
-            audience.sendActionBar(message.text());
-        } else if (message.type() == TextMessageType.BOTH) {
-            audience.sendMessage(message.text());
-            audience.sendActionBar(message.text());
-        } else if (message.type() == TextMessageType.TITLE) {
-            final Duration fadeIn = ObjectUtils.defaultIfNull(message.fadeIn(), Duration.of(0, TimeUnit.SECONDS.toChronoUnit()));
-            final Duration stay = message.stay();
-            final Duration fadeOut = ObjectUtils.defaultIfNull(message.fadeOut(), Duration.of(0, TimeUnit.SECONDS.toChronoUnit()));
-
-            if (stay == null) throw new RuntimeException();
-
-            if (message.title() != null) audience.sendTitlePart(TitlePart.TITLE, ObjectUtils.defaultIfNull(message.title(), Component.empty()));
-            if (message.subtitle() != null) audience.sendTitlePart(TitlePart.SUBTITLE, ObjectUtils.defaultIfNull(message.subtitle(), Component.empty()));
-
-            audience.sendTitlePart(TitlePart.TIMES, Title.Times.times(
-                fadeIn,
-                stay,
-                fadeOut
-            ));
-        }
-
-        final org.bukkit.Sound sound = message.sound();
-
-        if (sound != null && message.pitch() != -1 && message.volume() != -1) {
-            audience.playSound(Sound.sound(builder -> {
-                builder.pitch((float) message.pitch());
-                builder.volume((float) message.volume());
-                builder.type(sound.key());
-            }));
-        }
+        findAndSend(name, Elements.of(), audience);
     }
 
     public static void findAndSend(final @NotNull String name, final @NotNull Elements<Tuple<String, String>> replacements, final @NotNull Audience audience) {

@@ -3,7 +3,6 @@ package dev.continuum.duels.command.impl;
 import dev.continuum.duels.arena.*;
 import dev.continuum.duels.command.CommandRequirements;
 import dev.continuum.duels.config.Messages;
-import dev.continuum.duels.kit.PremadeKits;
 import dev.continuum.duels.permission.DuelPermission;
 import dev.continuum.duels.util.MaterialUtils;
 import dev.manere.utils.command.AbstractCommand;
@@ -11,11 +10,9 @@ import dev.manere.utils.command.CommandResult;
 import dev.manere.utils.command.impl.Commands;
 import dev.manere.utils.command.impl.dispatcher.CommandContext;
 import dev.manere.utils.command.impl.suggestions.Suggestions;
-import dev.manere.utils.elements.Elements;
 import dev.manere.utils.model.Tuple;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.WorldBorder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.manere.utils.command.CommandResult.done;
 import static dev.manere.utils.command.CommandResult.stop;
 
 public class ArenaCommand extends AbstractCommand {
@@ -71,7 +67,7 @@ public class ArenaCommand extends AbstractCommand {
 
         if (args.size() > 4 && args.get(2).equalsIgnoreCase("displayname")) {
             final String rawArena = args.get(1);
-            final Arena arena = Arenas.arena(rawArena);
+            final Arena arena = PremadeArenas.arena(rawArena);
 
             if (arena == null) {
                 Messages.message("arena_not_found", player, replacements -> {
@@ -118,7 +114,7 @@ public class ArenaCommand extends AbstractCommand {
 
         if (args.size() > 4 && args.get(2).equalsIgnoreCase("icon")) {
             final String rawArena = args.get(1);
-            final Arena arena = Arenas.arena(rawArena);
+            final Arena arena = PremadeArenas.arena(rawArena);
 
             if (arena == null) {
                 Messages.message("arena_not_found", player, replacements -> {
@@ -177,7 +173,7 @@ public class ArenaCommand extends AbstractCommand {
 
         if (args.size() == 4 && args.get(2).equalsIgnoreCase("spawn")) {
             final String rawArena = args.get(1);
-            final Arena arena = Arenas.arena(rawArena);
+            final Arena arena = PremadeArenas.arena(rawArena);
 
             if (arena == null) {
                 Messages.message("arena_not_found", player, replacements -> {
@@ -229,7 +225,7 @@ public class ArenaCommand extends AbstractCommand {
 
         if (args.size() == 3 && args.get(2).equalsIgnoreCase("center")) {
             final String rawArena = args.get(1);
-            final Arena arena = Arenas.arena(rawArena);
+            final Arena arena = PremadeArenas.arena(rawArena);
 
             if (arena == null) {
                 Messages.message("arena_not_found", player, replacements -> {
@@ -267,7 +263,7 @@ public class ArenaCommand extends AbstractCommand {
 
         if (args.size() == 4 && args.get(2).equalsIgnoreCase("corners")) {
             final String rawArena = args.get(1);
-            final Arena arena = Arenas.arena(rawArena);
+            final Arena arena = PremadeArenas.arena(rawArena);
 
             if (arena == null) {
                 Messages.message("arena_not_found", player, replacements -> {
@@ -322,7 +318,7 @@ public class ArenaCommand extends AbstractCommand {
             if (action.equalsIgnoreCase("create")) {
                 final String rawArena = args.get(1);
 
-                if (Arenas.arena(rawArena) != null) {
+                if (PremadeArenas.arena(rawArena) != null) {
                     Messages.message("arena_already_exists", player, replacements -> {
                         replacements.element(Tuple.tuple(
                             "arena",
@@ -350,7 +346,7 @@ public class ArenaCommand extends AbstractCommand {
                 }
 
                 final PremadeArena arena = new PremadeArena(rawArena);
-                new Arenas().cached().element(arena);
+                new PremadeArenas().cached().element(arena);
                 arena.saveAsync()
                     .thenRun(() -> Messages.message("creating_arena", player, replacements -> {
                         replacements.element(Tuple.tuple(
@@ -370,7 +366,7 @@ public class ArenaCommand extends AbstractCommand {
                 return CommandResult.stop();
             } else if (action.equalsIgnoreCase("delete")) {
                 final String rawArena = args.get(1);
-                final Arena arena = Arenas.arena(rawArena);
+                final Arena arena = PremadeArenas.arena(rawArena);
 
                 if (arena == null) {
                     Messages.message("arena_not_found", player, replacements -> {
@@ -405,7 +401,7 @@ public class ArenaCommand extends AbstractCommand {
                 return CommandResult.done();
             } else if (action.equalsIgnoreCase("teleport")) {
                 final String rawArena = args.get(1);
-                final Arena arena = Arenas.arena(rawArena);
+                final Arena arena = PremadeArenas.arena(rawArena);
 
                 if (arena == null) {
                     Messages.message("arena_not_found", player, replacements -> {
@@ -455,6 +451,7 @@ public class ArenaCommand extends AbstractCommand {
             }
         }
 
+        Messages.message("usages.arena_command", player);
         return CommandResult.done();
     }
 

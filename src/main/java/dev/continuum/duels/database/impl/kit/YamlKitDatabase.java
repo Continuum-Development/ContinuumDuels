@@ -2,12 +2,11 @@ package dev.continuum.duels.database.impl.kit;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.continuum.duels.arena.Arena;
-import dev.continuum.duels.arena.Arenas;
+import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.database.Database;
 import dev.continuum.duels.kit.CustomKit;
 import dev.continuum.duels.kit.KitContents;
 import dev.continuum.duels.util.Files;
-import dev.continuum.duels.util.MaterialUtils;
 import dev.manere.utils.cachable.Cachable;
 import dev.manere.utils.elements.Elements;
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +96,7 @@ public class YamlKitDatabase implements Database<CustomKit, CustomKit, Boolean> 
             final FileConfiguration configuration = configuration(value.uuid());
 
             final Elements<Arena> arenas = Elements.of(Arena.class);
-            arenas.element(0, Arenas.arena(configuration.getString("settings.arena", "failed_to_find")));
+            arenas.element(0, PremadeArenas.arena(configuration.getString("settings.arena", "failed_to_find")));
             value.arenas(arenas);
 
             value.displayName(configuration.getString("display_name", StringUtils.capitalize(value.name())));

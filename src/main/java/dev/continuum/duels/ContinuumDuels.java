@@ -1,9 +1,7 @@
 package dev.continuum.duels;
 
-import dev.continuum.duels.arena.Arenas;
-import dev.continuum.duels.database.DatabaseProvider;
+import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.database.provider.DatabaseProviders;
-import dev.continuum.duels.elo.PlayerRating;
 import dev.continuum.duels.elo.PlayerRatings;
 import dev.continuum.duels.fight.FrozenPlayers;
 import dev.continuum.duels.kit.PremadeKits;
@@ -18,6 +16,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 public final class ContinuumDuels extends PluginWrapper {
     @Override
     protected void start() {
+        saveDefaultConfig();
+        saveConfig();
         Files.save("messages.yml");
         Files.save("lobby.yml");
 
@@ -25,7 +25,7 @@ public final class ContinuumDuels extends PluginWrapper {
         DatabaseProviders.statistics().start();
 
         SavableCache.cache(CacheAction.START, PremadeKits.class, "Premade Kits");
-        SavableCache.cache(CacheAction.START, Arenas.class, "Premade Arenas");
+        SavableCache.cache(CacheAction.START, PremadeArenas.class, "Premade Arenas");
         SavableCache.cache(CacheAction.START, PlayerRatings.class, "Player Ratings (ELO)");
         Lobby.lobby().load(true);
 
@@ -43,8 +43,8 @@ public final class ContinuumDuels extends PluginWrapper {
         DatabaseProviders.kits().stop();
         DatabaseProviders.statistics().stop();
 
-        SavableCache.cache(CacheAction.STOP, Arenas.class, "Premade Arenas");
-        SavableCache.cache(CacheAction.STOP, Arenas.class, "Premade Arenas");
+        SavableCache.cache(CacheAction.STOP, PremadeKits.class, "Premade Kits");
+        SavableCache.cache(CacheAction.STOP, PremadeArenas.class, "Premade Arenas");
         SavableCache.cache(CacheAction.STOP, PlayerRatings.class, "Player Ratings (ELO)");
         new Lobby().save(true);
     }
