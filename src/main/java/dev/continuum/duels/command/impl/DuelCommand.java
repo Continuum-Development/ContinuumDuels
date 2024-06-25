@@ -43,7 +43,7 @@ public class DuelCommand extends AbstractCommand {
         final List<String> args = ctx.rawArgs();
 
         if (args.size() != 1) {
-            Messages.message("usages.arena_command", sender);
+            Messages.message("usages.duel_command", sender);
             return CommandResult.stop();
         }
 

@@ -1,6 +1,7 @@
 package dev.continuum.duels.arena;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.continuum.duels.kit.Kit;
 import dev.continuum.duels.util.Files;
 import dev.continuum.duels.util.SavableCache;
 import dev.manere.utils.elements.Elements;
@@ -26,6 +27,15 @@ public class PremadeArenas implements SavableCache<PremadeArena> {
 
         final int index = ThreadLocalRandom.current().nextInt(0, cached.size() + 1);
         return cached.element(index);
+    }
+
+    @Nullable
+    public static PremadeArena any(final @NotNull Kit kit) {
+        final Elements<Arena> arenas = kit.arenas();
+        if (cached.size() == 0) return null;
+
+        final int index = ThreadLocalRandom.current().nextInt(0, arenas.size() + 1);
+        return (PremadeArena) arenas.element(index);
     }
 
     @NotNull

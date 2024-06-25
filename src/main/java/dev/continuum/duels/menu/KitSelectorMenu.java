@@ -3,7 +3,6 @@ package dev.continuum.duels.menu;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import dev.continuum.duels.parser.menu.ParsedMenu;
 import dev.manere.utils.menu.normal.Menu;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class KitSelectorMenu extends ParsedMenu<Menu> {

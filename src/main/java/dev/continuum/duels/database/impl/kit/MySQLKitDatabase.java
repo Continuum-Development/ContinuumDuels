@@ -24,13 +24,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.CompletableFuture;
 
-public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean> {
+public class MySQLKitDatabase /* implements Database<CustomKit, Integer, CustomKit> */ {
     private static final HikariConfig config = new HikariConfig();
     private static HikariDataSource source;
     private static Connection connection;
 
     @NotNull
-    @Override
+    /* @Override */
     public Elements<String> types() {
         return Elements.of(
             "mysql", "sql"
@@ -38,7 +38,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
     }
 
     @NotNull
-    @Override
+    /* @Override */
     public Cachable<String, Class<?>> requiredDetails() {
         return Cachable.of(
             Tuple.tuple("ip", String.class),
@@ -50,7 +50,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
     }
 
     @NotNull
-    @Override
+    /* @Override */
     @CanIgnoreReturnValue
     public CompletableFuture<Boolean> start(final @NotNull Cachable<String, Object> details) {
         return CompletableFuture.supplyAsync(() -> {
@@ -135,6 +135,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
             .name("custom_kits")
             .column("owner", "VARCHAR(36) NOT NULL", true)
             .column("name", "TEXT(1000) NOT NULL", true)
+            .column("slot", "TINYINT NOT NULL", true)
             .column("display_name", "TEXT(1000) NOT NULL")
             .column("contents", "TEXT(65535) NOT NULL")
             .column("arena", "TEXT(1000) NOT NULL")
@@ -159,7 +160,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
         return true;
     }
 
-    @Override
+    /* @Override */
     @CanIgnoreReturnValue
     public boolean stop() {
         try {
@@ -175,7 +176,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
     }
 
     @NotNull
-    @Override
+    /* @Override */
     @CanIgnoreReturnValue
     public CompletableFuture<Boolean> save(final @NotNull CustomKit value) {
         return CompletableFuture.supplyAsync(() -> {
@@ -190,7 +191,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
                 statement.setString(6, Serializers.base64().serializeItemStacks(value.contents().contents().snapshot().asMap()));
 
                 final Arena arena = value.arenas().element(0);
-                statement.setString(5, arena == null ? "null" : arena.name());
+                statement.setString(5, "");
                 statement.setString(7, arena == null ? "null" : arena.name());
 
                 statement.executeUpdate();
@@ -204,7 +205,7 @@ public class MySQLKitDatabase implements Database<CustomKit, CustomKit, Boolean>
 
     @SuppressWarnings("CallToPrintStackTrace")
     @NotNull
-    @Override
+    /* @Override */
     @CanIgnoreReturnValue
     public CompletableFuture<Boolean> load(final @NotNull CustomKit value) {
         return CompletableFuture.supplyAsync(() -> {

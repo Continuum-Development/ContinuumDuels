@@ -1,16 +1,15 @@
 package dev.continuum.duels.menu;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import dev.continuum.duels.arena.PremadeArena;
 import dev.continuum.duels.arena.PremadeArenas;
 import dev.continuum.duels.kit.PremadeKit;
 import dev.continuum.duels.kit.PremadeKits;
-import dev.continuum.duels.parser.menu.PaginatedMenuParser;
 import dev.continuum.duels.parser.menu.ParsedMenu;
 import dev.continuum.duels.util.SavableCache;
 import dev.manere.utils.elements.Elements;
 import dev.manere.utils.item.ItemBuilder;
 import dev.manere.utils.menu.Button;
-import dev.manere.utils.menu.normal.Menu;
 import dev.manere.utils.menu.paginated.PaginatedMenu;
 import dev.manere.utils.menu.paginated.PaginatedSlot;
 import dev.manere.utils.model.Tuple;
@@ -21,28 +20,27 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.desktop.AppReopenedEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PremadeKitSelectorMenu extends ParsedMenu<PaginatedMenu> {
+public class ArenaSelectorMenu extends ParsedMenu<PaginatedMenu> {
     private final DuelMenu duelMenu;
 
-    public PremadeKitSelectorMenu(final @NotNull DuelMenu duelMenu) {
-        super(duelMenu.player(), PaginatedMenu.class, "premade_kit_selector_menu");
+    public ArenaSelectorMenu(final @NotNull DuelMenu duelMenu) {
+        super(duelMenu.player(), PaginatedMenu.class, "arena_selector_menu");
         this.duelMenu = duelMenu;
     }
 
     @Override
     public void init() {
-        final PremadeKits cache = SavableCache.cache(PremadeKits.class);
-        final Elements<PremadeKit> kits = cache.cached();
+        final PremadeArenas cache = SavableCache.cache(PremadeArenas.class);
+        final Elements<PremadeArena> kits = cache.cached();
         final FileConfiguration configuration = parser().configuration();
 
-        int start = configuration.getInt("kit_button.start");
+        int start = configuration.getInt("arena_button.start");
         if (start == 0 || start == -1) start = 19;
 
-        int end = configuration.getInt("kit_button.end");
+        int end = configuration.getInt("arena_button.end");
         if (end == 0 || end == -1) end = 44;
 
         int slot = start;
@@ -87,7 +85,7 @@ public class PremadeKitSelectorMenu extends ParsedMenu<PaginatedMenu> {
             });
         }
 
-        for (final PremadeKit kit : kits) {
+        for (final PremadeArena arena : kits) {
             if (slot == end) {
                 page++;
                 slot = 19;
@@ -99,24 +97,24 @@ public class PremadeKitSelectorMenu extends ParsedMenu<PaginatedMenu> {
             if (slot == 35 || slot == 36) slot = 37;
             if (slot == 44 || slot == 45) slot = 46;
 
-            final Material icon = kit.icon();
+            final Material icon = arena.info().icon();
 
-            String rawName = configuration.getString("kit_button.item.name");
+            String rawName = configuration.getString("arena_button.item.name");
             if (rawName == null) rawName = "<display name>";
 
-            rawName = rawName.replaceAll("<display name>", kit.displayName());
-            rawName = rawName.replaceAll("<display>", kit.displayName());
-            rawName = rawName.replaceAll("<name>", kit.name());
+            rawName = rawName.replaceAll("<display name>", arena.info().displayName());
+            rawName = rawName.replaceAll("<display>", arena.info().displayName());
+            rawName = rawName.replaceAll("<name>", arena.name());
 
             final Component name = TextStyle.style(rawName);
 
-            final List<String> rawLore = configuration.getStringList("kit_button.item.lore");
+            final List<String> rawLore = configuration.getStringList("arena_button.item.lore");
             final List<String> formattedRawLore = new ArrayList<>();
 
             for (String line : rawLore) {
-                line = line.replaceAll("<name>", kit.name());
-                line = line.replaceAll("<display name>", kit.displayName());
-                line = line.replaceAll("<display>", kit.displayName());
+                line = line.replaceAll("<name>", arena.name());
+                line = line.replaceAll("<display name>", arena.info().displayName());
+                line = line.replaceAll("<display>", arena.info().displayName());
 
                 formattedRawLore.add(line);
             }
@@ -135,9 +133,7 @@ public class PremadeKitSelectorMenu extends ParsedMenu<PaginatedMenu> {
             parser.menu().button(PaginatedSlot.paginatedSlot(slot, page), Button.button(item).onClick(event -> {
                 event.setCancelled(true);
 
-                duelMenu.kit(kit);
-
-                if (duelMenu.arena() == null) duelMenu.arena(PremadeArenas.any(kit));
+                duelMenu.arena(arena);
 
                 duelMenu.open();
             }));
@@ -146,13 +142,13 @@ public class PremadeKitSelectorMenu extends ParsedMenu<PaginatedMenu> {
 
     @NotNull
     @CanIgnoreReturnValue
-    public static PremadeKitSelectorMenu open(final @NotNull DuelMenu duelMenu) {
-        return new PremadeKitSelectorMenu(duelMenu).open();
+    public static ArenaSelectorMenu open(final @NotNull DuelMenu duelMenu) {
+        return new ArenaSelectorMenu(duelMenu).open();
     }
 
     @NotNull
     @CanIgnoreReturnValue
-    public PremadeKitSelectorMenu open() {
+    public ArenaSelectorMenu open() {
         init();
         parser.menu().open(player);
         return this;

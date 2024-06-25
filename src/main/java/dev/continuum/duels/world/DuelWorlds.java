@@ -2,17 +2,16 @@ package dev.continuum.duels.world;
 
 import dev.continuum.duels.config.ConfigHandler;
 import dev.manere.utils.library.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.generator.BiomeProvider;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 
 public class DuelWorlds {
@@ -37,6 +36,13 @@ public class DuelWorlds {
                 @Override
                 public List<Biome> getBiomes(final @NotNull WorldInfo worldInfo) {
                     return List.of(Biome.THE_VOID);
+                }
+            })
+            .generator(new ChunkGenerator() {
+                @NotNull
+                @Override
+                public Location getFixedSpawnLocation(@NotNull World world, @NotNull Random random) {
+                    return new Location(world, 0, 64, 0);
                 }
             })
             .generatorSettings("{\"\"biome\"\": \"\"minecraft:plains\"\",\"\"layers\"\": []}}")

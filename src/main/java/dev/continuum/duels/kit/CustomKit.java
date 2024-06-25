@@ -18,12 +18,14 @@ public class CustomKit implements Kit, PlayerSpecific {
 
     private final String name;
     private final UUID owner;
+    private final int kit;
 
     private String displayName = null;
 
-    public CustomKit(final @NotNull String name, final @NotNull UUID owner) {
+    public CustomKit(final int kit, final @NotNull String name, final @NotNull UUID owner) {
         this.name = name;
         this.owner = owner;
+        this.kit = kit;
     }
 
     @NotNull
@@ -61,6 +63,10 @@ public class CustomKit implements Kit, PlayerSpecific {
     @Override
     public String name() {
         return name;
+    }
+
+    public int kit() {
+        return kit;
     }
 
     @NotNull
